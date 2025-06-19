@@ -42,8 +42,6 @@ def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_grain=Tr
     """
     MUTATOR.
     Draws a noisy circle on an RGB image.
-
-    Returns one normal and one b/w image
     """
     cx, cy = center
 
@@ -63,3 +61,12 @@ def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_grain=Tr
 
     # for grain, we use white on a 2D array
     cv2.polylines(image, [pts], isClosed=True, color=drawParams.color if no_grain else (255, 255, 255), thickness=drawParams.thickness, lineType=drawParams.lineType)
+
+def draw_tracking(image, keypoints, drawParams: DrawParams, seed, no_grain=True):
+    """
+    Draws lines between keypoints on RGB image
+
+    Various algorithms:
+    sort and place into arrays
+    connect those that we are closest to
+    """

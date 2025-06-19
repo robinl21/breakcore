@@ -11,8 +11,7 @@ class BlobParams(ABC):
                  filterByArea=True, minArea=250, maxArea=10000,
                  filterByCircularity=False, minCircularity=0.1, maxCircularity=0.8,
                 filterByInertia=False, minInertiaRatio=0.1, maxInertiaRatio=0.6,
-                filterByConvexity=False, minConvexity=0.87, maxConvexity=0.95,
-                drawColor=(0, 0, 255), drawThickness=2, drawLineType=cv2.LINE_AA, drawNoise=(0,0), drawGrain=(0,0)):
+                filterByConvexity=False, minConvexity=0.87, maxConvexity=0.95):
         
         detectParams = cv2.SimpleBlobDetector_Params()
         detectParams.minThreshold = minThreshold
@@ -36,17 +35,11 @@ class BlobParams(ABC):
         # Set the detection parameters
         self.detectParams = detectParams
 
-        drawParams = DrawParams(drawColor, drawThickness, drawLineType, drawNoise, drawGrain)
-
-        # Set the draw parameters
-        self.drawParams = drawParams
-
 # abstract base class for blob detector
 #for other blob detectors, inherit from BlobDetector
 class BlobDetector(ABC):
     def __init__(self, params:BlobParams):
         self.detectParams = params.detectParams
-        self.drawParams = params.drawParams
         # Create a SimpleBlobDetector object with the specified parameters
         self.detector = cv2.SimpleBlobDetector_create(params.detectParams)
     """
@@ -57,8 +50,10 @@ class BlobDetector(ABC):
         pass
 
     """
-    Draws keypoints according to drawParams
+    MUTATOR
+    draws keypoints over original image
     """
     @abstractmethod
-    def drawKeypoints(self, img, keypoints):
+    def drawKeypoints(self, img, keypoints, drawParams):
         pass
+
