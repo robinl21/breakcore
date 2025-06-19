@@ -10,9 +10,9 @@ circleBlobParams = CircleBlobParams()
 circleBlobParams.detectParams.minArea = 500
 
 drawParams = DrawParams()
-drawParams.thickness = 10
+drawParams.thickness = 3
 drawParams.lineType = cv2.LINE_4
-drawParams.color = (0, 0, 0)
+drawParams.color = (255, 255, 255)
 drawParams.noise = (-10, 50)
 drawParams.grain = (-250, 0)  
 

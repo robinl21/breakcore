@@ -54,6 +54,10 @@ class CircleBlobDetector(BlobDetector):
 
         # TODO: draw tracking lines onto line_mask and overlay
 
+        draw_tracking(line_mask, keypoints, drawParams, seed, no_grain=False)
+        draw_tracking(overlay, keypoints, drawParams, seed)
+
+
 
         # Add grain to overlay lines
         add_grain(overlay, drawParams.grain)

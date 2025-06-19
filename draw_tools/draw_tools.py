@@ -2,12 +2,16 @@ import cv2
 import numpy as np
 
 class DrawParams():
-    def __init__(self, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA, noise=(0,0), grain=(0,0)):
+    def __init__(self, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA, noise=(0,0), grain=(0,0), num_connections=10, alg="random"):
         self.color = color
         self.thickness = thickness
         self.lineType = lineType
         self.noise = noise
         self.grain = grain
+
+        # tracking specific
+        self.num_connections = num_connections
+        self.alg = alg
 
 def add_grain(image, grain):
     """
@@ -62,11 +66,33 @@ def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_grain=Tr
     # for grain, we use white on a 2D array
     cv2.polylines(image, [pts], isClosed=True, color=drawParams.color if no_grain else (255, 255, 255), thickness=drawParams.thickness, lineType=drawParams.lineType)
 
+
+def random_pairing(keypoints, num_connections):
+    """
+    Randomly pairs keypoints
+    """
+    connections = set()
+    while len(connections) < num_connections:
+        indices = np.random.choice(len(keypoints), 2, replace=False)
+        a, b = keypoints[indices[0]], keypoints[indices[1]]
+        if (a, b) not in connections and (b, a) not in connections:
+            connections.add((a, b))
+    return list(connections)
+
 def draw_tracking(image, keypoints, drawParams: DrawParams, seed, no_grain=True):
     """
+    MUTATOR.
     Draws lines between keypoints on RGB image
 
     Various algorithms:
-    sort and place into arrays
-    connect those that we are closest to
+    - Random pairing
+    - Nearest neighbor
+
     """
+    if drawParams.alg == "random":
+        lines = random_pairing(keypoints, drawParams.num_connections)
+        for a, b in lines:
+            # Draw line between keypoints
+            cv2.line(image, (int(a.pt[0]), int(a.pt[1])), (int(b.pt[0]), int(b.pt[1])), drawParams.color if no_grain else (255, 255, 255), drawParams.thickness, drawParams.lineType)
+
+    
