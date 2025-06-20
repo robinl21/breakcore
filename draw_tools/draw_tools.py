@@ -72,6 +72,15 @@ def random_pairing(keypoints, num_connections):
     Randomly pairs keypoints
     """
     connections = set()
+    
+    # If we have fewer than 2 keypoints, we can't make any connections
+    if len(keypoints) < 2:
+        return []
+    
+    # Limit the number of connections to what's possible
+    max_possible_connections = len(keypoints) * (len(keypoints) - 1) // 2
+    num_connections = min(num_connections, max_possible_connections)
+    
     while len(connections) < num_connections:
         indices = np.random.choice(len(keypoints), 2, replace=False)
         a, b = keypoints[indices[0]], keypoints[indices[1]]
