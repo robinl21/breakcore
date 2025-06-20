@@ -67,14 +67,14 @@ def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_grain=Tr
     cv2.polylines(image, [pts], isClosed=True, color=drawParams.color if no_grain else (255, 255, 255), thickness=drawParams.thickness, lineType=drawParams.lineType)
 
 
-def random_pairing(keypoints, num_connections):
+def random_pairing(keypoints, num_connections, seed):
     """
     Randomly pairs keypoints
     """
     connections = set()
+    rng = np.random.default_rng(seed=seed)
     while len(connections) < num_connections:
-        indices = np.random.choice(len(keypoints), 2, replace=False)
-        a, b = keypoints[indices[0]], keypoints[indices[1]]
+        a, b = rng.choice(keypoints, size=2, replace=False)
         if (a, b) not in connections and (b, a) not in connections:
             connections.add((a, b))
     return list(connections)
@@ -90,7 +90,7 @@ def draw_tracking(image, keypoints, drawParams: DrawParams, seed, no_grain=True)
 
     """
     if drawParams.alg == "random":
-        lines = random_pairing(keypoints, drawParams.num_connections)
+        lines = random_pairing(keypoints, drawParams.num_connections, seed)
         for a, b in lines:
             # Draw line between keypoints
             cv2.line(image, (int(a.pt[0]), int(a.pt[1])), (int(b.pt[0]), int(b.pt[1])), drawParams.color if no_grain else (255, 255, 255), drawParams.thickness, drawParams.lineType)
