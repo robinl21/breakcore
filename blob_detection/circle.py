@@ -37,17 +37,18 @@ class CircleBlobDetector(BlobDetector):
         # black background for grain mask
         line_mask = np.zeros((h, w, 3), dtype=np.uint8)
 
+        # If no keypoints detected, return original image
+        if len(keypoints) == 0:
+            return img_to_draw_on
+
+        seed = np.random.randint(0, 2**32 - 1)
         # draw tracking
         for kp in keypoints:
             x, y = int(kp.pt[0]), int(kp.pt[1])
             radius = int(kp.size / 2)
 
-            # drawing circles uses random noise, but we seed it to maintain consistency among mask and actual drawing
-            seed = np.random.randint(0, 2**32 - 1)
-
             # Draw keypoint on grain mask using white
             draw_circle(line_mask, (x,y), radius, drawParams, seed, no_grain=False)
-
 
             # Draw keypoint on overlay using color
             draw_circle(overlay, (x, y), radius, drawParams, seed)
@@ -56,8 +57,6 @@ class CircleBlobDetector(BlobDetector):
 
         draw_tracking(line_mask, keypoints, drawParams, seed, no_grain=False)
         draw_tracking(overlay, keypoints, drawParams, seed)
-
-
 
         # Add grain to overlay lines
         add_grain(overlay, drawParams.grain)

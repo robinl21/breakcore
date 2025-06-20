@@ -3,10 +3,20 @@ from blob_detection import *
 from draw_tools.draw_tools import *
 import numpy as np
 
-img = cv2.imread('samples/ogwau.jpeg') # Load in grayscale for simplicity
+# Initialize webcam
+cap = cv2.VideoCapture(0)
+
+# Check if webcam opened successfully
+if not cap.isOpened():
+    print("Error: Could not open webcam")
+    exit()
+
+# Set webcam properties for better performance
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cap.set(cv2.CAP_PROP_FPS, 30)
 
 circleBlobParams = CircleBlobParams()
-
 circleBlobParams.detectParams.minArea = 500
 
 drawParams = DrawParams()
@@ -18,17 +28,36 @@ drawParams.grain = (-250, 0)
 
 circleBlobDetector = CircleBlobDetector(circleBlobParams)
 
-keypoints = circleBlobDetector.detect(img)
+try:
+    while True:
+        ret, frame = cap.read()
+        
+        if not ret:
+            print("Error: Can't receive frame from webcam")
+            break
 
-# Draw detected blobs as red circles on transparent overlay
-print("Drawing keypoints \n")
-blobs = circleBlobDetector.drawKeypoints(img, keypoints, drawParams)
+        # Detect blobs in the current frame
+        keypoints = circleBlobDetector.detect(frame)
 
+        # Draw detected blobs on the frame
+        result = circleBlobDetector.drawKeypoints(frame, keypoints, drawParams)
 
+        # Display the result
+        cv2.imshow("Real-time Blob Detection", result)
 
-#  Show the image with detected blobs
-cv2.imshow("Blobs", blobs)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+        # Wait for key press and handle it
+        key = cv2.waitKey(1) & 0xFF
+        
+        if key == ord('q'):
+            print("Quitting...")
+            break
+        elif key == ord('s'):
+            # Save current frame
+            cv2.imwrite('captured_frame.jpg', result)
+            print("Frame saved as 'captured_frame.jpg'")
 
-print("DONE")
+finally:
+    # Release everything when job is finished
+    cap.release()
+    cv2.destroyAllWindows()
+    print("DONE")
