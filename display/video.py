@@ -4,6 +4,7 @@ from display.image import *
 #TODO: try to prevent repeated renders
 
 #TODO: multiple video in one frame (recursive) 
+# layers: 
 
 
 # image displayed for a # of beat intervals

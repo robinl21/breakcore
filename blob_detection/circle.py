@@ -31,8 +31,16 @@ class CircleBlobDetector(BlobDetector):
         # Detect blobs in the image
         keypoints = self.detector.detect(img)
         indices = math.ceil(len(keypoints) * self.keypointsKept)
-        return keypoints[:indices]
 
+        # Randomly sample without replacement
+        if indices > 0:
+            selected_indices = np.random.choice(len(keypoints), size=indices, replace=False)
+            sampled_keypoints = [keypoints[i] for i in selected_indices]
+        else:
+            sampled_keypoints = []
+
+        return sampled_keypoints
+    
     # TODO: parallelize this via merge sort method
     def drawKeypoints(self, img_to_draw_on, keypoints, drawParams):
         h, w = img_to_draw_on.shape[:2]
@@ -52,7 +60,7 @@ class CircleBlobDetector(BlobDetector):
             seed = np.random.randint(0, 2**32 - 1)
 
             # Draw keypoint on grain mask using white
-            draw_circle(line_mask, (x,y), radius, drawParams, seed, no_grain=False)
+            draw_circle(line_mask, (x,y), radius, drawParams, seed, no_outline=False)
 
 
             # Draw keypoint on overlay using color
@@ -60,7 +68,9 @@ class CircleBlobDetector(BlobDetector):
 
         # TODO: draw tracking lines onto line_mask and overlay
 
-        draw_tracking(line_mask, keypoints, drawParams, seed, no_grain=False)
+        # drawing circles uses random noise, but we seed it to maintain consistency among mask and actual drawing
+        seed = np.random.randint(0, 2**32 - 1)
+        draw_tracking(line_mask, keypoints, drawParams, seed, no_outline=False)
         draw_tracking(overlay, keypoints, drawParams, seed)
 
 

@@ -1,7 +1,7 @@
-from blob_detection import *
+from blob_detection.circle import *
 from draw_tools.draw_tools import *
-from display.audio import *
 from display.image import *
+from display.audio import *
 from display.video import *
 
 import cv2

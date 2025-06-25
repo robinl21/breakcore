@@ -45,11 +45,13 @@ Rendering is in pre-order traversal (in order of overlay children)
 When making changes, changes don't apply until rendered
 """
 class BaseImage(Image):
-    def __init__(self, imgFile, scale=1.0):
+    def __init__(self, imgFile, scale=1.0, grain=(0,0)):
         self.imgFile = imgFile
 
         # scale of base image is relative to given image
         self.scale = scale
+
+        self.grain = grain
 
         self.children = []
 
@@ -120,6 +122,8 @@ class BaseImage(Image):
         # Resize the current image based on the new scale
         rendered = cv2.resize(rendered, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_LINEAR)
         
+        add_grain(rendered, self.grain)
+
         # Image dimensions
         lh, lw = rendered.shape[:2]
 
@@ -170,8 +174,7 @@ class BaseImage(Image):
 
                     # Apply blending
                     blended_region = child.transparency * overlay_region + (1-child.transparency) * base_region
-
-                    rendered[y1_base:y2_base, x1_base: x2_base] = blended_region[y1_src:y2_src, x1_src:x2_src]
+                    rendered[y1_base:y2_base, x1_base: x2_base] = blended_region
 
             elif isinstance(child, SketchImage):
                 print("SKETCH IMAGE")
@@ -182,7 +185,7 @@ class BaseImage(Image):
 
 
 class OverlayImage(BaseImage):
-    def __init__(self, img, cxPercent=0.5, cyPercent=0.5, scale=0.5, transparency=1.0):
+    def __init__(self, img, cxPercent=0.5, cyPercent=0.5, scale=0.5, grain=(0, 0), transparency=1.0):
         """
         cxPercent and cyPercent are relative to parent image size for center
         """
@@ -192,6 +195,7 @@ class OverlayImage(BaseImage):
         self.cxPercent = cxPercent
         self.cyPercent = cyPercent
         self.transparency = transparency
+        self.grain = grain
 
     def reCenter(self, cxPercent, cyPercent):
         """
@@ -203,8 +207,7 @@ class OverlayImage(BaseImage):
 
 class SketchImage(Image):
     """
-    Since sketches depend on the parent and previous siblings, sketch images are less of an image and more of a "command"{
-    to add the sketch upon rendering
+    Creates a sketch image that draws on top of parent image.
     """
     def __init__(self, sketchTool, drawParams):
         """

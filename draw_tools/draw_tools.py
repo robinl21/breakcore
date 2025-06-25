@@ -24,6 +24,9 @@ def add_grain(image, grain):
         intensity (int): Noise strength (0–255)
         alpha (float): Blending factor for grain visibility
     """
+
+    if grain == (0,0):
+        return image
     h, w, c = image.shape
     
     # Create random noise: same shape, values in [-intensity, intensity]
@@ -42,7 +45,7 @@ def add_grain(image, grain):
     image[:] = cv2.addWeighted(image, 1 - 0.5, noisy, 0.5, 0)
 
 
-def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_grain=True):
+def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_outline=True):
     """
     MUTATOR.
     Draws a noisy circle on an RGB image.
@@ -63,8 +66,8 @@ def draw_circle(image, center, radius, drawParams: DrawParams, seed, no_grain=Tr
 
     pts = np.array(points, dtype=np.int32).reshape((-1, 1, 2))
 
-    # for grain, we use white on a 2D array
-    cv2.polylines(image, [pts], isClosed=True, color=drawParams.color if no_grain else (255, 255, 255), thickness=drawParams.thickness, lineType=drawParams.lineType)
+    # for outline, we use white on a 2D array
+    cv2.polylines(image, [pts], isClosed=True, color=drawParams.color if no_outline else (255, 255, 255), thickness=drawParams.thickness, lineType=drawParams.lineType)
 
 
 def random_pairing(keypoints, num_connections, seed):
@@ -82,7 +85,7 @@ def random_pairing(keypoints, num_connections, seed):
             connections.add((a, b))
     return list(connections)
 
-def draw_tracking(image, keypoints, drawParams: DrawParams, seed, no_grain=True):
+def draw_tracking(image, keypoints, drawParams: DrawParams, seed, no_outline=True):
     """
     MUTATOR.
     Draws lines between keypoints on RGB image
@@ -96,6 +99,6 @@ def draw_tracking(image, keypoints, drawParams: DrawParams, seed, no_grain=True)
         lines = random_pairing(keypoints, drawParams.num_connections, seed)
         for a, b in lines:
             # Draw line between keypoints
-            cv2.line(image, (int(a.pt[0]), int(a.pt[1])), (int(b.pt[0]), int(b.pt[1])), drawParams.color if no_grain else (255, 255, 255), drawParams.thickness, drawParams.lineType)
+            cv2.line(image, (int(a.pt[0]), int(a.pt[1])), (int(b.pt[0]), int(b.pt[1])), drawParams.color if no_outline else (255, 255, 255), drawParams.thickness, drawParams.lineType)
 
     
