@@ -11,7 +11,8 @@ class BlobParams(ABC):
                  filterByArea=True, minArea=250, maxArea=10000,
                  filterByCircularity=False, minCircularity=0.1, maxCircularity=0.8,
                 filterByInertia=False, minInertiaRatio=0.1, maxInertiaRatio=0.6,
-                filterByConvexity=False, minConvexity=0.87, maxConvexity=0.95):
+                filterByConvexity=False, minConvexity=0.87, maxConvexity=0.95,
+                keypointsKept=1.0):
         
         detectParams = cv2.SimpleBlobDetector_Params()
         detectParams.minThreshold = minThreshold
@@ -35,6 +36,8 @@ class BlobParams(ABC):
         # Set the detection parameters
         self.detectParams = detectParams
 
+        self.keypointsKept = keypointsKept
+
 # abstract base class for blob detector
 #for other blob detectors, inherit from BlobDetector
 class BlobDetector(ABC):
@@ -42,16 +45,18 @@ class BlobDetector(ABC):
         self.detectParams = params.detectParams
         # Create a SimpleBlobDetector object with the specified parameters
         self.detector = cv2.SimpleBlobDetector_create(params.detectParams)
+        self.keypointsKept = params.keypointsKept
     """
     Detects blobs and returns list of keypoints
+    Keypoints are decremented via keypoint % 
     """
     @abstractmethod
     def detect(self, img):
         pass
 
     """
-    MUTATOR
-    draws keypoints over original image
+    Returns new overlay image of blobs/tracing lines
+    DOES NOT MODIFY ORIGINAL IMAGE
     """
     @abstractmethod
     def drawKeypoints(self, img, keypoints, drawParams):

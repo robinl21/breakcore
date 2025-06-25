@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 class DrawParams():
     def __init__(self, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA, noise=(0,0), grain=(0,0), num_connections=10, alg="random"):
@@ -31,7 +32,6 @@ def add_grain(image, grain):
     # Repeat noise across 3 channels (R, G, B)
     noise = np.repeat(noise, 3, axis=2)
 
-    print("Noise", noise)
     # Add noise to original image
     noisy = image.astype(np.int16) + noise
 
@@ -73,7 +73,10 @@ def random_pairing(keypoints, num_connections, seed):
     """
     connections = set()
     rng = np.random.default_rng(seed=seed)
-    while len(connections) < num_connections:
+    max_connections = min(num_connections, math.comb(len(keypoints), 2))
+
+    # TODO: this is too slow if we saturate graph
+    while len(connections) < max_connections:
         a, b = rng.choice(keypoints, size=2, replace=False)
         if (a, b) not in connections and (b, a) not in connections:
             connections.add((a, b))
