@@ -40,6 +40,6 @@ class EdgeDetector():
         line_mask = np.zeros((h, w, 3), dtype=np.uint8)
 
         cv2.drawContours(overlay, contours, -1, drawParams.color, drawParams.thickness, drawParams.lineType, offset=drawParams.offset)
-        cv2.drawContours(line_mask, contours, -1, drawParams.color, drawParams.thickness, drawParams.lineType, offset=drawParams.offset)
+        cv2.drawContours(line_mask, contours, -1, (255, 255, 255), drawParams.thickness, drawParams.lineType, offset=drawParams.offset)
         
         return overlay, line_mask

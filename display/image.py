@@ -144,7 +144,7 @@ class BaseImage(Image):
             child.renderImage()
 
             childRender = child.getRenderedImage()
-
+            
             # We add rendered child to us
 
             # Dimensions of overlay
@@ -171,7 +171,7 @@ class BaseImage(Image):
             x2_src = x1_src + (x2_base - x1_base)
             y2_src = y1_src + (y2_base - y1_base)
 
-            if isinstance(child, BlobSketchImage):
+            if isinstance(child, BlobSketchImage) or isinstance(child, EdgeSketchImage):
                 mask = child.getMask()
 
                 overlay_region = childRender[y1_src:y2_src, x1_src:x2_src]
