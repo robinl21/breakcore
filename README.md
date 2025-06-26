@@ -12,10 +12,11 @@ A Python-based tool for generating glitchy, sketch-like visuals using edge detec
 - [x] Blob Detection with Circular Sketch Outlines and Tracking Lines
 
 ### In Progress
-- [ ] Edge Tracing
+- [ ] Edge Tracing Effect
 - [ ] Windows
 
 ### Future Goals
+- [ ] Pixelate Effect
 - [ ] Animation
 - [ ] Audio Syncing
 
@@ -70,15 +71,15 @@ A Python-based tool for generating glitchy, sketch-like visuals using edge detec
 
 ---
 
-### Edge Tracing
+## Edge Tracing
 
-## Edge Detection Methods
+### Edge Detection Methods
     Canny: Clean, thin edges. 
 
-## Find Contours
+### Find Contours
     Using edges detected, connects and creates contours. 
 
-## Add effects:
+### Add effects:
     Glitch. 
     Jitter.  
     RGB Split. 
