@@ -3,7 +3,8 @@
 A Python-based tool for generating glitchy, sketch-like visuals using edge detection, blob tracking, and audio-synced animations.
 
 ---
-
+## Samples:
+![Nurture](samples/nurture/final.png)
 ## ROADMAP
 
 ### Completed
