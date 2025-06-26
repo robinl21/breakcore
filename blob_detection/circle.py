@@ -42,6 +42,7 @@ class CircleBlobDetector(BlobDetector):
         return sampled_keypoints
     
     # TODO: parallelize this via merge sort method
+    # Returns render, and mask
     def drawKeypoints(self, img_to_draw_on, keypoints, drawParams):
         h, w = img_to_draw_on.shape[:2]
         
@@ -73,11 +74,8 @@ class CircleBlobDetector(BlobDetector):
         draw_tracking(line_mask, keypoints, drawParams, seed, no_outline=False)
         draw_tracking(overlay, keypoints, drawParams, seed)
 
-
-
-        # Add grain to overlay lines
-        add_grain(overlay, drawParams.grain)
-
+        return overlay, line_mask
+    
         # Background = original image. On mask lines = overlay grained lines
         condition = line_mask > 0
         final = np.where(condition, overlay, img_to_draw_on)

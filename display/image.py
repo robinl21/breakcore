@@ -1,4 +1,4 @@
-from blob_detection import *
+from blob_detection.circle import *
 from draw_tools.draw_tools import *
 
 import cv2
@@ -9,26 +9,18 @@ import numpy as np
 """
 Image Hierarchy:
 
-
-Scale of images are relative to the image provided.
-
 Base Image: the background image, which can have overlays and blobs on top of it
     Overlay Image: an image that is rendered on top of the base image.
         Centered at a specific point relative to the base image size.
         If overlay image is bigger, cuts off.
 
-Sketch Image:
-    Same size as its parent (blob/tracking)
-    Drawn over current state of rendering.
+        Sketch Image:
+            Specific version of overlay image. Sketches "over" parent image.
 
 Changes called through functions, but not actually applied until rendering.
 """
 
 # SketchImages: sketches on top of overlay images (from tools)
-
-
-import cv2
-import numpy as np
 
 from abc import ABC, abstractmethod
 
@@ -112,6 +104,7 @@ class BaseImage(Image):
         """
         return self.curRender.copy()
 
+
     def renderImage(self):
         """
         Render the current image with all overlays applied and scale applied
@@ -128,40 +121,56 @@ class BaseImage(Image):
         lh, lw = rendered.shape[:2]
 
         for child in self.children:
-            if isinstance(child, OverlayImage):
 
-                print("Processing overlay image child \n")
+            print("Processing overlay image child \n")
 
-                # Child renders itself first
-                child.renderImage()
+            # Child renders itself first
+            child.renderImage()
 
-                childRender = child.getRenderedImage()
+            childRender = child.getRenderedImage()
 
-                # We add rendered child to us
+            # We add rendered child to us
 
-                # Dimensions of overlay
+            # Dimensions of overlay
 
-                sh, sw = childRender.shape[:2]
+            sh, sw = childRender.shape[:2]
 
-                # Compute center for overlay
-                x_center = int(lw * child.cxPercent)
-                y_center = int(lh * child.cyPercent)
+            # Compute center for overlay
+            x_center = int(lw * child.cxPercent)
+            y_center = int(lh * child.cyPercent)
 
-                
-                # Compute bounds of overlay in base image
-                x1_base = max(0, x_center - sw // 2)
-                y1_base = max(0, y_center - sh // 2)
-                x2_base= min(lw, x_center + sw // 2)
-                y2_base = min(lh, y_center + sh // 2)
+            
+            # Compute bounds of overlay in base image
+            x1_base = max(0, x_center - sw // 2)
+            y1_base = max(0, y_center - sh // 2)
+            x2_base= min(lw, x_center + sw // 2)
+            y2_base = min(lh, y_center + sh // 2)
 
-                # Compute corresponding region in overlay image
-                # Logic: from center, try to go left by half.
-                x1_src = max(0, -(x_center - sw // 2))
-                y1_src = max(0, -(y_center - sh // 2))
+            # Compute corresponding region in overlay image
+            # Logic: from center, try to go left by half.
+            x1_src = max(0, -(x_center - sw // 2))
+            y1_src = max(0, -(y_center - sh // 2))
 
-                # 2base - 1base = width of overlay image needed while still being less than lw, lh
-                x2_src = x1_src + (x2_base - x1_base)
-                y2_src = y1_src + (y2_base - y1_base)
+            # 2base - 1base = width of overlay image needed while still being less than lw, lh
+            x2_src = x1_src + (x2_base - x1_base)
+            y2_src = y1_src + (y2_base - y1_base)
+
+            if isinstance(child, SketchImage):
+                mask = child.getMask()
+
+                overlay_region = childRender[y1_src:y2_src, x1_src:x2_src]
+                base_region = rendered[y1_base:y2_base, x1_base: x2_base]
+
+                # apply transparency before putting on mask
+                print("transparency: ", child.transparency)
+                blended_region = child.transparency * overlay_region + (1-child.transparency) * base_region
+                mask_region = mask[y1_src:y2_src, x1_src:x2_src]
+
+                condition = mask_region > 0
+
+                blended_region = np.where(condition, blended_region, base_region)
+                rendered[y1_base:y2_base, x1_base: x2_base] = blended_region
+            else:
 
                 if child.transparency == 1:
                     # Overlay: bound by lh, lw
@@ -176,9 +185,6 @@ class BaseImage(Image):
                     blended_region = child.transparency * overlay_region + (1-child.transparency) * base_region
                     rendered[y1_base:y2_base, x1_base: x2_base] = blended_region
 
-            elif isinstance(child, SketchImage):
-                print("SKETCH IMAGE")
-                rendered = child.sketchOnImage(rendered)
 
         self.curRender = rendered
 
@@ -205,26 +211,61 @@ class OverlayImage(BaseImage):
         self.cxPercent = cxPercent
         self.cyPercent = cyPercent
 
-class SketchImage(Image):
+class SketchImage(OverlayImage):
     """
     Creates a sketch image that draws on top of parent image.
+
+    imgInspo is an np array
     """
-    def __init__(self, sketchTool, drawParams):
+    def __init__(self, imgInspo, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
         """
         Supported sketchTools: circleDetector instance
         """
+        # scale of base image is relative to given image
+        self.scale = scale
+
+        self.grain = grain
+
+        self.curImage = imgInspo
+
+        self.curRender = self.curImage.copy()  # Start with a copy of the current image for rendering
+
+        self.cxPercent = cxPercent
+        self.cyPercent = cyPercent
+        self.transparency = transparency
+        self.grain = grain
+
         self.sketchTool = sketchTool
         self.drawParams = drawParams
 
-    def sketchOnImage(self, imgToSketchOn):
-        """
-        Returns copy of imgToSketchOn with sketch.
-        does not modify imgToSketchOn
-        """
-        # Use the sketch tool to draw on the image
-        keypoints = self.sketchTool.detect(imgToSketchOn)
-        newImage = self.sketchTool.drawKeypoints(imgToSketchOn, keypoints, self.drawParams)
-        return newImage
+        self.mask = None
+
+        self.children = []
+
+        self.renderImage()
+
+    def setChildren(self):
+        raise ValueError("Not implemented")
+    
+    def renderImage(self):
+        rendered = self.curImage.copy()
+
+        # Resize the current image based on the new scale
+        rendered = cv2.resize(rendered, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_LINEAR)
+        
+        keypoints = self.sketchTool.detect(rendered)
+
+        rendered, mask = self.sketchTool.drawKeypoints(rendered, keypoints, self.drawParams)
+
+        add_grain(rendered, self.grain)
+
+        self.curRender = rendered
+        self.mask = mask
+
+        print("shapes: ", self.curRender.shape, self.mask.shape)
+
+    def getMask(self):
+        return self.mask.copy()
 
 def displayImage(img, title="Image"):
     """
@@ -293,11 +334,12 @@ if __name__ == "__main__":
     drawParams.lineType = cv2.LINE_4
     drawParams.color = (255, 255, 255)
     drawParams.noise = (-10, 50)
-    drawParams.grain = (-250, 255)  
 
     circleBlobDetector = CircleBlobDetector(circleBlobParams)
 
-    circleBlobDetectorImage = SketchImage(circleBlobDetector, drawParams)
+    # Sketch image is now LOCKED onto original baseImage array.
+    # If base image changes, sketch image does not change with it (except for resize)
+    circleBlobDetectorImage = SketchImage(baseImage.getRenderedImage(), circleBlobDetector, drawParams)
 
     baseImage.setChildren([overlayImage, overlayImage2,circleBlobDetectorImage])
     overlayImage.setChildren([circleBlobDetectorImage])
@@ -310,6 +352,7 @@ if __name__ == "__main__":
     # Resizing children
 
     print("Doubling size")
+
     baseImage.resize_image_relative(2)
 
     renderAndDisplay(baseImage)

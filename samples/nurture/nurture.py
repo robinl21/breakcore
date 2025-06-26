@@ -33,9 +33,8 @@ if __name__ == "__main__":
     grassDrawParams.thickness=5
     grassDrawParams.color = (255, 255, 255)
     grassDrawParams.noise = (-100, 500)
-    grassDrawParams.grain= (-50, 50)
 
-    grassSketchImage = SketchImage(grassBlobDetector, grassDrawParams)
+    grassSketchImage = SketchImage(grass.getRenderedImage(), grassBlobDetector, grassDrawParams, grain=(-50, 50))
     grass.setChildren([grassSketchImage])
 
     # Liminal chairs in center too
@@ -50,9 +49,8 @@ if __name__ == "__main__":
     chairDrawParams.thickness=1
     chairDrawParams.color = (255, 255, 255)
     chairDrawParams.noise = (-50, 10)
-    chairDrawParams.grain= (0, 0)
 
-    chairSketchImage = SketchImage(chairBlobDetector, chairDrawParams)
+    chairSketchImage = SketchImage(chairs.getRenderedImage(), chairBlobDetector, chairDrawParams)
     chairs.setChildren([chairSketchImage])
 
     # Spiral
@@ -67,9 +65,8 @@ if __name__ == "__main__":
     spiralDrawParams.thickness=4
     spiralDrawParams.color = (255, 255, 255)
     spiralDrawParams.noise = (0, 0)
-    spiralDrawParams.grain= (0, 0)
 
-    spiralSketchImage = SketchImage(spiralBlobDetector, spiralDrawParams)
+    spiralSketchImage = SketchImage(spiral.getRenderedImage(), spiralBlobDetector, spiralDrawParams)
     spiral.setChildren([spiralSketchImage])
 
     # Splotches of blue sky
@@ -84,6 +81,8 @@ if __name__ == "__main__":
     sky_square2 = OverlayImage('samples/nurture/images/cloud_square.png', grain=(-100, 100), cxPercent=0.8, cyPercent=0.60, scale=1, transparency=0.5)
     baseImage.setChildren([sky_rect_vert2, grass, spiral, chairs, sky_rect_low, sky_rect_vert, sky_rect_high, sky_square, sky_square2])
 
+    baseImage.renderImage()
+
     # Green Flowers
     flowerBlobParams = CircleBlobParams(minThreshold=150, minArea=2000, keypointsKept=0.3)
     flowerBlobDetector = CircleBlobDetector(flowerBlobParams)
@@ -94,12 +93,12 @@ if __name__ == "__main__":
     flowerDrawParams.color = (228, 179, 117)
 
     flowerDrawParams.noise = (0, 0)
-    flowerDrawParams.grain= (-100, 100)
 
-    flowerSketchImage = SketchImage(flowerBlobDetector, flowerDrawParams)
+    print("Flower sketch image")
+    flowerSketchImage = SketchImage(baseImage.getRenderedImage(), flowerBlobDetector, flowerDrawParams, grain=(-100, 100), transparency=1)
+
 
     baseImage.setChildren([flowerSketchImage, sky_rect_vert2, grass, spiral, chairs, sky_rect_low, sky_rect_vert, sky_rect_high, sky_square, sky_square2])
-
 
     renderAndDisplay(baseImage)
 
