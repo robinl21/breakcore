@@ -28,6 +28,13 @@ class Image(ABC):
     def __init__():
         pass
 
+class StandardBlock(Image):
+    def __init__(self, color, height, width, grain):
+        self.color = color
+        self.height = height
+        self.width = width
+        self.grain = grain
+
 """
 THe background image.
 
@@ -35,10 +42,14 @@ Input takes in jpgs, etc. -> converts into np array
 Rendering is in pre-order traversal (in order of overlay children)
 
 When making changes, changes don't apply until rendered
+
+imgSource is iether
 """
 class BaseImage(Image):
-    def __init__(self, imgFile, scale=1.0, grain=(0,0)):
-        self.imgFile = imgFile
+    def __init__(self, imgSource, scale=1.0, grain=(0,0)):
+
+        # either fiile or StandardBlock
+        self.imgSource = imgSource
 
         # scale of base image is relative to given image
         self.scale = scale
@@ -47,21 +58,26 @@ class BaseImage(Image):
 
         self.children = []
 
-        # SHOULD NOT CHANGE AT ALL - only render changes
-        self.curImage = self.fileToImage(imgFile)
+        # Source -> curImage
+        self.curImage = self.sourceToImage(imgSource)
 
         self.curRender = self.curImage.copy()  # Start with a copy of the current image for rendering
 
         self.renderImage() # Renders image to get currRender
 
-    def fileToImage(self, imgFile):
+    def sourceToImage(self, imgSource):
         """
-        Converts image file to np array
+        Converts image source to np array
         """
-        img = cv2.imread(imgFile, cv2.IMREAD_COLOR) 
-        if img is None:
-            raise ValueError(f"Could not read image file: {imgFile}")
-        
+        img = None
+        if isinstance(imgSource, str):
+            img = cv2.imread(imgSource, cv2.IMREAD_COLOR) 
+            if img is None:
+                raise ValueError(f"Could not read image file: {imgSource}")
+        else:
+            # StandardBlock
+            img= np.full((imgSource.height, imgSource.width, 3), imgSource.color, dtype=np.uint8)
+            add_grain(img, imgSource.grain)
         return img
     
     def resize_image(self, scale):
@@ -91,12 +107,12 @@ class BaseImage(Image):
         """
         self.children = children
 
-    def changeBaseImage(self, newImgFile):
+    def changeBaseImage(self, newimgSource):
         """
         Modifies base child image
         """
 
-        self.curImage = self.fileToImage(newImgFile)
+        self.curImage = self.sourceToImage(newimgSource)
 
     def getRenderedImage(self):
         """
@@ -192,11 +208,11 @@ class BaseImage(Image):
 
 
 class OverlayImage(BaseImage):
-    def __init__(self, img, cxPercent=0.5, cyPercent=0.5, scale=0.5, grain=(0, 0), transparency=1.0):
+    def __init__(self, imgSource, cxPercent=0.5, cyPercent=0.5, scale=0.5, grain=(0, 0), transparency=1.0):
         """
         cxPercent and cyPercent are relative to parent image size for center
         """
-        super().__init__(img, scale)
+        super().__init__(imgSource, scale)
         
         # center of overlay relative to parent image size
         self.cxPercent = cxPercent
@@ -216,9 +232,9 @@ class BlobSketchImage(OverlayImage):
     """
     Creates a sketch image that draws on top of parent image for blob capturing
 
-    imgInspo is an np array
+    imgSource is an np array
     """
-    def __init__(self, imgInspo, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
+    def __init__(self, imgSource, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
         """
         Supported sketchTools: 
         circleDetector instance
@@ -229,7 +245,7 @@ class BlobSketchImage(OverlayImage):
 
         self.grain = grain
 
-        self.curImage = imgInspo
+        self.curImage = imgSource
 
         self.curRender = self.curImage.copy()  # Start with a copy of the current image for rendering
 
@@ -291,9 +307,9 @@ class EdgeSketchImage(OverlayImage):
     Creates a sketch image that draws on top of parent image for edge/contours
 
     # TODO: this could inherit similarly with BlobSketch maybe
-    imgInspo is an np array
+    imgSource is an np array
     """
-    def __init__(self, imgInspo, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
+    def __init__(self, imgSource, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
         """
         Supported sketchTools: 
         circleDetector instance
@@ -304,7 +320,7 @@ class EdgeSketchImage(OverlayImage):
 
         self.grain = grain
 
-        self.curImage = imgInspo
+        self.curImage = imgSource
 
         self.curRender = self.curImage.copy()  # Start with a copy of the current image for rendering
 

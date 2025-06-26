@@ -10,11 +10,12 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    # python -m display.nurture
+    # python -m display.angel.angel
 
 
-    # Base Image of Wires:
-    baseImage = BaseImage('samples/nurture/images/wire.jpeg', scale=2.0, grain=(-50, 50))
+    # Base Image: White Grain
+    standardWhite = StandardBlock((255, 255, 255), 1080, 1080, grain=(-50, 50))
+    baseImage = BaseImage(standardWhite, scale=1.0, grain=(-50, 50))
 
     # Basic render:
     renderImage = baseImage.getRenderedImage()
