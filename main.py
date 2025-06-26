@@ -63,11 +63,9 @@ baseImage = BaseImage('samples/flash/images/ogwau.jpeg', scale=1.0)
 # drawParams.lineType = cv2.LINE_4
 # drawParams.color = (255, 255, 255)
 # drawParams.noise = (-10, 50)
-# drawParams.grain = (-250, 255)  
-
 # circleBlobDetector = CircleBlobDetector(circleBlobParams)
 
-# circleBlobDetectorImage = SketchImage(circleBlobDetector, drawParams)
+# circleBlobDetectorImage = BlobSketchImage(circleBlobDetector, drawParams)
 
 
 # # Bug: drawing doesn't work with circleBlobDetector first...?

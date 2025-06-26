@@ -43,12 +43,12 @@ class CircleBlobDetector(BlobDetector):
     
     # TODO: parallelize this via merge sort method
     # Returns render, and mask
-    def drawKeypoints(self, img_to_draw_on, keypoints, drawParams):
+    def getSketchTemplate(self, img_to_draw_on, keypoints, drawParams):
         h, w = img_to_draw_on.shape[:2]
         
         overlay = img_to_draw_on.copy()
 
-        # black background for grain mask
+        # black background for mask
         line_mask = np.zeros((h, w, 3), dtype=np.uint8)
 
         # draw tracking
@@ -76,10 +76,5 @@ class CircleBlobDetector(BlobDetector):
 
         return overlay, line_mask
     
-        # Background = original image. On mask lines = overlay grained lines
-        condition = line_mask > 0
-        final = np.where(condition, overlay, img_to_draw_on)
-        # combined = np.hstack((img_to_draw_on, line_mask, overlay, final))
-        return final
 
     

@@ -3,16 +3,18 @@ import numpy as np
 import math
 
 class DrawParams():
-    def __init__(self, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA, noise=(0,0), grain=(0,0), num_connections=10, alg="random"):
+    def __init__(self, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA, noise=(0,0), grain=(0,0), num_connections=10, alg="random", offset = (0,0)):
         self.color = color
         self.thickness = thickness
         self.lineType = lineType
         self.noise = noise
-        self.grain = grain
 
         # tracking specific
         self.num_connections = num_connections
         self.alg = alg
+
+        # edge detection only
+        self.offset = offset
 
 def add_grain(image, grain):
     """

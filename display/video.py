@@ -133,11 +133,10 @@ if __name__ == "__main__":
     drawParams.lineType = cv2.LINE_4
     drawParams.color = (255, 255, 255)
     drawParams.noise = (-10, 50)
-    drawParams.grain = (-250, 255)  
 
     circleBlobDetector = CircleBlobDetector(circleBlobParams)
 
-    circleBlobDetectorImage = SketchImage(circleBlobDetector, drawParams)
+    circleBlobDetectorImage = BlobSketchImage(circleBlobDetector, drawParams)
 
     baseImage.setChildren([overlayImage, overlayImage2,circleBlobDetectorImage])
     overlayImage.setChildren([circleBlobDetectorImage])

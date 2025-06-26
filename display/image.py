@@ -20,7 +20,7 @@ Base Image: the background image, which can have overlays and blobs on top of it
 Changes called through functions, but not actually applied until rendering.
 """
 
-# SketchImages: sketches on top of overlay images (from tools)
+# BlobSketchImages: sketches on top of overlay images (from tools)
 
 from abc import ABC, abstractmethod
 
@@ -155,7 +155,7 @@ class BaseImage(Image):
             x2_src = x1_src + (x2_base - x1_base)
             y2_src = y1_src + (y2_base - y1_base)
 
-            if isinstance(child, SketchImage):
+            if isinstance(child, BlobSketchImage):
                 mask = child.getMask()
 
                 overlay_region = childRender[y1_src:y2_src, x1_src:x2_src]
@@ -171,6 +171,7 @@ class BaseImage(Image):
                 blended_region = np.where(condition, blended_region, base_region)
                 rendered[y1_base:y2_base, x1_base: x2_base] = blended_region
             else:
+                # overlay image
 
                 if child.transparency == 1:
                     # Overlay: bound by lh, lw
@@ -211,15 +212,17 @@ class OverlayImage(BaseImage):
         self.cxPercent = cxPercent
         self.cyPercent = cyPercent
 
-class SketchImage(OverlayImage):
+class BlobSketchImage(OverlayImage):
     """
-    Creates a sketch image that draws on top of parent image.
+    Creates a sketch image that draws on top of parent image for blob capturing
 
     imgInspo is an np array
     """
     def __init__(self, imgInspo, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
         """
-        Supported sketchTools: circleDetector instance
+        Supported sketchTools: 
+        circleDetector instance
+
         """
         # scale of base image is relative to given image
         self.scale = scale
@@ -255,7 +258,7 @@ class SketchImage(OverlayImage):
         
         keypoints = self.sketchTool.detect(rendered)
 
-        rendered, mask = self.sketchTool.drawKeypoints(rendered, keypoints, self.drawParams)
+        rendered, mask = self.sketchTool.getSketchTemplate(rendered, keypoints, self.drawParams)
 
         add_grain(rendered, self.grain)
 
@@ -263,6 +266,79 @@ class SketchImage(OverlayImage):
         self.mask = mask
 
         print("shapes: ", self.curRender.shape, self.mask.shape)
+
+    def getMask(self):
+        return self.mask.copy()
+
+def displayImage(img, title="Image"):
+    """
+    Displays an image in a window.
+    """
+    cv2.imshow(title, img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows() 
+
+def renderAndDisplay(img: Image, title="image"):
+    """
+    Renders and displays image
+    """
+    img.renderImage()
+    renderedImage = img.getRenderedImage()
+    displayImage(renderedImage, title)
+
+class EdgeSketchImage(OverlayImage):
+    """
+    Creates a sketch image that draws on top of parent image for edge/contours
+
+    # TODO: this could inherit similarly with BlobSketch maybe
+    imgInspo is an np array
+    """
+    def __init__(self, imgInspo, sketchTool, drawParams, cxPercent=0.5, cyPercent=0.5, scale=1.0, grain=(0,0), transparency=1.0):
+        """
+        Supported sketchTools: 
+        circleDetector instance
+
+        """
+        # scale of base image is relative to given image
+        self.scale = scale
+
+        self.grain = grain
+
+        self.curImage = imgInspo
+
+        self.curRender = self.curImage.copy()  # Start with a copy of the current image for rendering
+
+        self.cxPercent = cxPercent
+        self.cyPercent = cyPercent
+        self.transparency = transparency
+        self.grain = grain
+
+        self.sketchTool = sketchTool
+        self.drawParams = drawParams
+
+        self.children = []
+
+        self.renderImage()
+
+    def setChildren(self):
+        raise ValueError("Not implemented")
+    
+    def renderImage(self):
+        rendered = self.curImage.copy()
+
+        # Resize the current image based on the new scale
+        rendered = cv2.resize(rendered, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_LINEAR)
+        
+        edges = self.sketchTool.get_edges(rendered)
+
+        contours = self.sketchTool.get_contours(edges)
+
+        rendered, mask = self.sketchTool.getSketchTemplate(rendered, contours, self.drawParams)
+
+        add_grain(rendered, self.grain)
+
+        self.curRender = rendered
+        self.mask = mask
 
     def getMask(self):
         return self.mask.copy()
@@ -339,7 +415,7 @@ if __name__ == "__main__":
 
     # Sketch image is now LOCKED onto original baseImage array.
     # If base image changes, sketch image does not change with it (except for resize)
-    circleBlobDetectorImage = SketchImage(baseImage.getRenderedImage(), circleBlobDetector, drawParams)
+    circleBlobDetectorImage = BlobSketchImage(baseImage.getRenderedImage(), circleBlobDetector, drawParams)
 
     baseImage.setChildren([overlayImage, overlayImage2,circleBlobDetectorImage])
     overlayImage.setChildren([circleBlobDetectorImage])

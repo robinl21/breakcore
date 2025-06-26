@@ -1,6 +1,8 @@
-from blob_detection import *
+from blob_detection.circle import *
 from draw_tools.draw_tools import *
 from display.image import *
+
+from edge_detection.edge import *
 
 import cv2
 import numpy as np
@@ -84,21 +86,19 @@ if __name__ == "__main__":
     baseImage.renderImage()
 
     # Green Flowers
-    flowerBlobParams = CircleBlobParams(minThreshold=150, minArea=2000, keypointsKept=0.3)
-    flowerBlobDetector = CircleBlobDetector(flowerBlobParams)
+    flowerEdgeParams = EdgeParams()
+    flowerEdgeDetector = EdgeDetector(flowerEdgeParams)
 
     # Flower Parameters
-    flowerDrawParams = DrawParams(num_connections=0)
-    flowerDrawParams.thickness= 25
+    flowerDrawParams = DrawParams()
+    flowerDrawParams.thickness= 1
     flowerDrawParams.color = (228, 179, 117)
 
-    flowerDrawParams.noise = (0, 0)
-
-    print("Flower sketch image")
-    flowerBlobSketchImage = BlobSketchImage(baseImage.getRenderedImage(), flowerBlobDetector, flowerDrawParams, grain=(-100, 100), transparency=1)
+    print("Flower edge sketch image")
+    flowerEdgeSketchImage = EdgeSketchImage(baseImage.getRenderedImage(), flowerEdgeDetector, flowerDrawParams, grain=(-100, 100), transparency=1)
 
 
-    baseImage.setChildren([flowerBlobSketchImage, sky_rect_vert2, grass, spiral, chairs, sky_rect_low, sky_rect_vert, sky_rect_high, sky_square, sky_square2])
+    baseImage.setChildren([sky_rect_vert2, grass, spiral, chairs, sky_rect_low, sky_rect_vert, sky_rect_high, sky_square, sky_square2, flowerEdgeSketchImage])
 
     renderAndDisplay(baseImage)
 

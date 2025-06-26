@@ -59,6 +59,6 @@ class BlobDetector(ABC):
     DOES NOT MODIFY ORIGINAL IMAGE
     """
     @abstractmethod
-    def drawKeypoints(self, img, keypoints, drawParams):
+    def getSketchTemplate(self, img, keypoints, drawParams):
         pass
 
