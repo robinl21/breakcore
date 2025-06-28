@@ -19,104 +19,107 @@ if __name__ == "__main__":
 
     # Angel:
 
+    # Test filling
     angel = OverlayImage('samples/angel/images/angel.png')
 
-    # Angel Sketch Detector
-    angelEdgeParams = EdgeParams()
+    # Angel Edge Detector for winged outline
+    angelEdgeParams = OutlineParams(threshold1=50, threshold2=150)
     angelEdgeDetector = EdgeDetector(angelEdgeParams)
 
+    # Angel Threshold Detector to fill in outline for a "messy" look
+    angelThresholdParams = OutlineParams(is_threshold=True)
+    angelThresholdDetector = EdgeDetector(angelThresholdParams)
+
     # Angel Drawing Parameters
-    angelDrawParams = DrawParams(color=(0, 0, 0))
+    angelDrawParams = DrawParams(color=(242, 66, 245), thickness=-1)
 
-    angelEdgeImage = EdgeSketchImage(angel.getRenderedImage(), angelEdgeDetector, angelDrawParams, grain=(-50, 50))
-
-    baseImage.setChildren([angelEdgeImage])
+    angelDrawParamsThreshold = DrawParams(color=(0, 0, 0), thickness=-1)
+    
+    angelEdgeImage = EdgeSketchImage(angel.getRenderedImage(), angelEdgeDetector, angelDrawParams, scale=1.5, grain=(-100, 100))
+    angelThresholdImage = EdgeSketchImage(angel.getRenderedImage(), angelThresholdDetector, angelDrawParamsThreshold, scale=1.5, grain=(-100,100))
+    
+    baseImage.setChildren([angelThresholdImage, angelEdgeImage])
 
     renderAndDisplay(baseImage, "Angel")
-    # Grass space in center
 
-    # grass = OverlayImage('samples/nurture/images/space.jpeg', scale=0.8, transparency=0.9)
-
-
-    # # Grass Blob Detector
-    # grassBlobParams = CircleBlobParams(minThreshold=10, maxThreshold=100)
-    # grassBlobDetector = CircleBlobDetector(grassBlobParams)
-
-    # # Grass Drawing Parameters
-    # grassDrawParams = DrawParams()
-    # grassDrawParams.thickness=5
-    # grassDrawParams.color = (255, 255, 255)
-    # grassDrawParams.noise = (-100, 500)
-
-    # grassBlobSketchImage = BlobSketchImage(grass.getRenderedImage(), grassBlobDetector, grassDrawParams, grain=(-50, 50))
-    # grass.setChildren([grassBlobSketchImage])
-
-    # # Liminal chairs in center too
-    # chairs = OverlayImage('samples/nurture/images/chairs.jpeg', grain=(-100, 100), cxPercent=0.8, cyPercent=0.65, scale=1.2, transparency=0.9)
+    madoka = OverlayImage('samples/angel/images/madoka.jpeg')
+    madokaRotate = OverlayImage('samples/angel/images/madoka_rotate.png')
     
-    # # Chair Blob Detector
-    # chairBlobParams = CircleBlobParams(maxThreshold=180, keypointsKept=0.6)
-    # chairBlobDetector = CircleBlobDetector(chairBlobParams)
+    madokaEdgeParams = OutlineParams(threshold1=50, threshold2=150)
+    madokaEdgeDetector = EdgeDetector(angelEdgeParams)
+    madokaDrawParams = DrawParams(color=(242, 66, 245), thickness=-1)
 
-    # # Chair Drawing Parameters
-    # chairDrawParams = DrawParams()
-    # chairDrawParams.thickness=1
-    # chairDrawParams.color = (255, 255, 255)
-    # chairDrawParams.noise = (-50, 10)
-
-    # chairBlobSketchImage = BlobSketchImage(chairs.getRenderedImage(), chairBlobDetector, chairDrawParams)
-    # chairs.setChildren([chairBlobSketchImage])
-
-    # # Spiral
-    # spiral = OverlayImage('samples/nurture/images/spiral.JPG', grain=(-100,100), cxPercent=0.14, cyPercent=0.2, scale=0.4, transparency=0.7)
+    madokaEdgeImage = EdgeSketchImage(madoka.getRenderedImage(), madokaEdgeDetector, madokaDrawParams, cxPercent=0.15, scale=1, grain=(-200, 200))
     
-    # # Spiral Blob Detector
-    # spiralBlobParams = CircleBlobParams(minThreshold=160, maxThreshold=10000)
-    # spiralBlobDetector = CircleBlobDetector(spiralBlobParams)
+    madokaThresholdParams = OutlineParams(is_threshold=True)
+    madokaThresholdDetector = EdgeDetector(madokaThresholdParams)
+    madokaThresholdDrawParams = DrawParams(color=(0, 0, 0), thickness=-1, offset=(5, 5))
 
-    # # Chair Drawing Parameters
-    # spiralDrawParams = DrawParams()
-    # spiralDrawParams.thickness=4
-    # spiralDrawParams.color = (255, 255, 255)
-    # spiralDrawParams.noise = (0, 0)
-
-    # spiralBlobSketchImage = BlobSketchImage(spiral.getRenderedImage(), spiralBlobDetector, spiralDrawParams)
-    # spiral.setChildren([spiralBlobSketchImage])
-
-    # # Splotches of blue sky
-    # sky_rect_low = OverlayImage('samples/nurture/images/cloud_rect.png', grain=(-100, 100), cxPercent=0.4, cyPercent=0.8, scale=1.5, transparency=0.8)
-    # sky_rect_high = OverlayImage('samples/nurture/images/cloud_rect.png', grain=(-100, 100), cxPercent=0.75, cyPercent=0.2, scale=1.5, transparency=0.8)
+    madokaThresholdImage = EdgeSketchImage(madoka.getRenderedImage(), madokaThresholdDetector, madokaThresholdDrawParams, cxPercent=0.15, scale=1, transparency=0.8)
     
-    # sky_rect_vert = OverlayImage('samples/nurture/images/cloud_rect_vert.png', grain=(-100, 100), cxPercent=0.2, cyPercent=0.7, scale=1.5, transparency=0.8)
+
+    # TODO: tune to be less clean of a line
+    madokaDrawParams2 = DrawParams(color=(0, 0, 0), thickness=3, offset=(15, 0))
+    madokaEdgeImage2 = EdgeSketchImage(madoka.getRenderedImage(), madokaEdgeDetector, madokaDrawParams2, cxPercent=0.15, scale=1, grain=(-200, 200))
     
-    # sky_rect_vert2 = OverlayImage('samples/nurture/images/cloud_rect_vert.png', grain=(-100, 100), cxPercent=0.8, cyPercent=0.2, scale=1.5, transparency=0.8)
-    # sky_square = OverlayImage('samples/nurture/images/cloud_square.png', grain=(-100, 100), cxPercent=0.2, cyPercent=0.2, scale=1, transparency=0.8)
 
-    # sky_square2 = OverlayImage('samples/nurture/images/cloud_square.png', grain=(-100, 100), cxPercent=0.8, cyPercent=0.60, scale=1, transparency=0.5)
-    # baseImage.setChildren([sky_rect_vert2, grass, spiral, chairs, sky_rect_low, sky_rect_vert, sky_rect_high, sky_square, sky_square2])
+    blackBlock = StandardBlock((0, 0, 0), 1000, 500, (-1000, 1000))
+    blackBase1 = OverlayImage(blackBlock, cxPercent=0.2)
 
-    # baseImage.renderImage()
+    blackBlock2 = StandardBlock((0, 0, 0), 1600, 500, (-1000, 1000))
+    blackBase2 = OverlayImage(blackBlock2, cxPercent=0.7)
 
-    # # Green Flowers
-    # flowerEdgeParams = EdgeParams()
-    # flowerEdgeDetector = EdgeDetector(flowerEdgeParams)
+    madokaDetailedDraw = DrawParams(color=(0, 0, 0), thickness=-1)
+    madokaDetailed = OutlineParams(threshold1=200, threshold2 = 300, contourMode=cv2.RETR_LIST)
+    madokaDetailedEdgeDetector = EdgeDetector(madokaDetailed)
 
-    # # Flower Parameters
-    # flowerDrawParams = DrawParams()
-    # flowerDrawParams.thickness= 1
-    # flowerDrawParams.color = (228, 179, 117)
+    madokaDetailedImage = EdgeSketchImage(madoka.getRenderedImage(), madokaDetailedEdgeDetector, madokaDetailedDraw, cxPercent=0.25, scale=3, grain=(-200, 200))
 
-    # print("Flower edge sketch image")
-    # flowerEdgeSketchImage = EdgeSketchImage(baseImage.getRenderedImage(), flowerEdgeDetector, flowerDrawParams, grain=(-100, 100), transparency=1)
+    madokaAbstractDraw = DrawParams(color=(242,66,245), thickness=1, offset=(0, 0))
+    madokaAbstract = OutlineParams(threshold1=1, threshold2=15, contourMode = cv2.RETR_TREE)
+    madokaAbstractEdgeDetector = EdgeDetector(madokaAbstract)
+    madokaDetailedImage2 = EdgeSketchImage(madoka.getRenderedImage(), madokaAbstractEdgeDetector, madokaAbstractDraw, cxPercent=0.999, cyPercent=0.55, scale=2.6, grain=(-200, 200))
+    
+    
+    # turn sketch into edges
+    bowImg = OverlayImage('samples/angel/images/sketch_texture.jpeg', scale=0.2)
+
+    bowDrawParams = DrawParams(color=(0, 0, 255), thickness=-1)
+    bowEdgeParams = OutlineParams(threshold1=225, threshold2=500, contourMode=cv2.RETR_EXTERNAL)
+
+    bowEdgeDetector = EdgeDetector(bowEdgeParams)
+
+    bowImage = EdgeSketchImage(bowImg.getRenderedImage(), bowEdgeDetector, bowDrawParams, cxPercent=0.2, scale=1, grain=(-200, 200))
+    
+
+    bowImgReflect = OverlayImage('samples/angel/images/sketch_texture_rotate.png', scale=0.2)
+
+    bowImageReflect = EdgeSketchImage(bowImgReflect.getRenderedImage(), bowEdgeDetector, bowDrawParams, cxPercent=0.8, scale=1, grain=(-200, 200))
+    
+
+    starImg = OverlayImage('samples/angel/images/stars.png', scale=1)
+
+    starDrawParams = DrawParams(color=(214, 214, 214), thickness=-1)
+    starEdgeParams = OutlineParams(threshold1=250, threshold2=350, contourMode=cv2.RETR_EXTERNAL)
+
+    starEdgeDetector = EdgeDetector(starEdgeParams)
+
+    starEdgeImage = EdgeSketchImage(starImg.getRenderedImage(), starEdgeDetector, starDrawParams, scale=1, cxPercent=0.8, cyPercent=0.5, grain=(-400, 400))
+    
+
+    standardPink = StandardBlock(color=(242, 66, 245), height=50, width=250, grain=(-100, 100))
+    pinkRow = OverlayImage(standardPink, cxPercent=0.4, cyPercent=0.36, scale=1, transparency=0.85)
+
+    standardPink2 = StandardBlock(color=(242, 66, 245), height=425, width=50)
+    pinkCol = OverlayImage(standardPink2, cxPercent=0.99, cyPercent=0.5, scale=4, transparency=0.85, grain=(-100, 100))
+    pinkCol2 = OverlayImage(standardPink2, cxPercent=0.4, cyPercent=0.45, scale=1, transparency=0.85, grain=(-100, 100))
 
 
-    # baseImage.setChildren([sky_rect_vert2, grass, spiral, chairs, sky_rect_low, sky_rect_vert, sky_rect_high, sky_square, sky_square2, flowerEdgeSketchImage])
+    baseImage.setChildren([pinkCol, blackBase1, blackBase2, pinkRow, angelThresholdImage, pinkCol2, madokaDetailedImage, angelEdgeImage, madokaEdgeImage, bowImage, starEdgeImage, bowImageReflect])
+    renderAndDisplay(baseImage, "Angel")
 
-    # renderAndDisplay(baseImage)
+    finalImg = baseImage.getRenderedImage()
 
-    # # finalImg = baseImage.getRenderedImage()
-
-    # # cv2.imwrite("samples/nurture/final.png", finalImg)
-
+    cv2.imwrite("samples/angel/final.png", finalImg)
 
     

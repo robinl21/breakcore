@@ -14,7 +14,8 @@ A Python-based tool for generating glitchy, sketch-like visuals using edge detec
 
 ### In Progress
 - [ ] Edge Tracing Effect
-- [ ] Windows
+- [ ] Filling in sketches
+- [ ] Reflection/Rotation
 
 ### Future Goals
 - [ ] Pixelate Effect

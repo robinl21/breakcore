@@ -29,7 +29,7 @@ class Image(ABC):
         pass
 
 class StandardBlock(Image):
-    def __init__(self, color, height, width, grain):
+    def __init__(self, color, height, width, grain=(0,0)):
         self.color = color
         self.height = height
         self.width = width
@@ -144,7 +144,7 @@ class BaseImage(Image):
             child.renderImage()
 
             childRender = child.getRenderedImage()
-            
+
             # We add rendered child to us
 
             # Dimensions of overlay
@@ -344,10 +344,8 @@ class EdgeSketchImage(OverlayImage):
 
         # Resize the current image based on the new scale
         rendered = cv2.resize(rendered, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_LINEAR)
-        
-        edges = self.sketchTool.get_edges(rendered)
 
-        contours = self.sketchTool.get_contours(edges)
+        contours = self.sketchTool.get_contours(rendered)
 
         rendered, mask = self.sketchTool.getSketchTemplate(rendered, contours, self.drawParams)
 
