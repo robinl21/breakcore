@@ -11,10 +11,11 @@ A Python-based tool for generating glitchy, sketch-like visuals using edge detec
 - [x] Image Layering with Transparency and Grain
 - [x] Proportional Resize
 - [x] Blob Detection with Circular Sketch Outlines and Tracking Lines
+- [x] Edge Tracing Effect
+- [x] Filling in sketches
 
 ### In Progress
-- [ ] Edge Tracing Effect
-- [ ] Filling in sketches
+- [ ] Glitchy Edge Effects
 - [ ] Reflection/Rotation
 
 ### Future Goals
