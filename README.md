@@ -4,6 +4,7 @@ A Python-based tool for generating glitchy, sketch-like visuals using edge detec
 
 ---
 ## Samples:
+![Madoka](samples/angel/final.png)
 ![Nurture](samples/nurture/final.png)
 ## ROADMAP
 
