@@ -18,8 +18,6 @@ if __name__ == "__main__":
     baseImage = BaseImage(standardWhite, scale=1.0, grain=(-50, 50))
 
     # Angel:
-
-    # Test filling
     angel = OverlayImage('samples/angel/images/angel.png')
 
     # Angel Edge Detector for winged outline
@@ -30,16 +28,16 @@ if __name__ == "__main__":
     angelThresholdParams = OutlineParams(is_threshold=True)
     angelThresholdDetector = EdgeDetector(angelThresholdParams)
 
-    # Angel Drawing Parameters
+    # Drawing Parameters for edge versus infill
     angelDrawParams = DrawParams(color=(242, 66, 245), thickness=-1)
-
     angelDrawParamsThreshold = DrawParams(color=(0, 0, 0), thickness=-1)
     
+    # Render images
     angelEdgeImage = EdgeSketchImage(angel.getRenderedImage(), angelEdgeDetector, angelDrawParams, scale=1.5, grain=(-100, 100))
     angelThresholdImage = EdgeSketchImage(angel.getRenderedImage(), angelThresholdDetector, angelDrawParamsThreshold, scale=1.5, grain=(-100,100))
     
+    # Overlay images on top of base image
     baseImage.setChildren([angelThresholdImage, angelEdgeImage])
-
     renderAndDisplay(baseImage, "Angel")
 
     madoka = OverlayImage('samples/angel/images/madoka.jpeg')
@@ -118,8 +116,6 @@ if __name__ == "__main__":
     baseImage.setChildren([pinkCol, blackBase1, blackBase2, pinkRow, angelThresholdImage, pinkCol2, madokaDetailedImage, angelEdgeImage, madokaEdgeImage, bowImage, starEdgeImage, bowImageReflect])
     renderAndDisplay(baseImage, "Angel")
 
-    finalImg = baseImage.getRenderedImage()
-
-    cv2.imwrite("samples/angel/final.png", finalImg)
+    
 
     

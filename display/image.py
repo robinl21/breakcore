@@ -74,10 +74,13 @@ class BaseImage(Image):
             img = cv2.imread(imgSource, cv2.IMREAD_COLOR) 
             if img is None:
                 raise ValueError(f"Could not read image file: {imgSource}")
-        else:
+        elif isinstance(imgSource, StandardBlock):
             # StandardBlock
             img= np.full((imgSource.height, imgSource.width, 3), imgSource.color, dtype=np.uint8)
             add_grain(img, imgSource.grain)
+        else:
+            # np array, already converted
+            img = imgSource.copy()
         return img
     
     def resize_image(self, scale):
@@ -106,6 +109,9 @@ class BaseImage(Image):
         Sets children
         """
         self.children = children
+
+    def addChild(self, child):
+        self.children.append(child)
 
     def changeBaseImage(self, newimgSource):
         """
@@ -138,7 +144,6 @@ class BaseImage(Image):
 
         for child in self.children:
 
-            print("Processing overlay image child \n")
 
             # Child renders itself first
             child.renderImage()
@@ -178,7 +183,6 @@ class BaseImage(Image):
                 base_region = rendered[y1_base:y2_base, x1_base: x2_base]
 
                 # apply transparency before putting on mask
-                print("transparency: ", child.transparency)
                 blended_region = child.transparency * overlay_region + (1-child.transparency) * base_region
                 mask_region = mask[y1_src:y2_src, x1_src:x2_src]
 
@@ -194,7 +198,6 @@ class BaseImage(Image):
                     rendered[y1_base:y2_base, x1_base: x2_base] = childRender[y1_src:y2_src, x1_src:x2_src]
                 else:
 
-                    print("Rendering transparent")
                     overlay_region = childRender[y1_src:y2_src, x1_src:x2_src]
                     base_region = rendered[y1_base:y2_base, x1_base: x2_base]
 
@@ -204,6 +207,17 @@ class BaseImage(Image):
 
 
         self.curRender = rendered
+
+    def makeCopy(self):
+        # imgSource - if array, does copy anyways
+        copy = BaseImage(self.imgSource, self.scale, self.grain)
+
+        # add children's copies
+        for child in self.children:
+            copy.addChild(child.makeCopy())
+
+        return copy
+
 
 
 
@@ -227,6 +241,16 @@ class OverlayImage(BaseImage):
         """
         self.cxPercent = cxPercent
         self.cyPercent = cyPercent
+
+    def makeCopy(self):
+        # imgSource - if array, does copy anyways
+        copy = OverlayImage(self.imgSource, self.cxPercent, self.cyPercent, self.scale, self.grain, self.transparency)
+
+        # add children's copies
+        for child in self.children:
+            copy.addChid(child.makeCopy())
+
+        return copy
 
 class BlobSketchImage(OverlayImage):
     """
@@ -281,10 +305,21 @@ class BlobSketchImage(OverlayImage):
         self.curRender = rendered
         self.mask = mask
 
-        print("shapes: ", self.curRender.shape, self.mask.shape)
-
     def getMask(self):
         return self.mask.copy()
+    
+    """
+    Note: sketchTool is shared
+    """
+    def makeCopy(self):
+        # imgSource - if array, does copy anyways
+        copy = BlobSketchImage(self.imgSource, self.sketchTool, self.drawParams, self.cxPercent, self.cyPercent, self.scale, self.grain, self.transparency)
+
+        # add children's copies
+        for child in self.children:
+            copy.addChild(child.makeCopy())
+
+        return copy
 
 def displayImage(img, title="Image"):
     """
@@ -356,7 +391,17 @@ class EdgeSketchImage(OverlayImage):
 
     def getMask(self):
         return self.mask.copy()
+    
+    def makeCopy(self):
+        # imgSource - if array, does copy anyways
+        copy = EdgeSketchImage(self.imgSource, self.sketchTool, self.drawParams, self.cxPercent, self.cyPercent, self.scale, self.grain, self.transparency)
 
+        # add children's copies
+        for child in self.children:
+            copy.addChild(child.makeCopy())
+
+        return copy
+    
 def displayImage(img, title="Image"):
     """
     Displays an image in a window.

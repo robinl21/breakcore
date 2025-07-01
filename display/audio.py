@@ -78,7 +78,7 @@ class Audio():
 
 if __name__ == "__main__":
     print("Running audio test cases...")
-    audio = Audio("samples/flash/audio/flash.wav", fps=200)
+    audio = Audio("samples/flash/audio/flash.wav", min_bpm = 200, max_bpm = 1000, fps=200)
 
     beats = audio.render_beats()
 

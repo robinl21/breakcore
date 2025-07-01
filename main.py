@@ -85,7 +85,7 @@ baseImage = BaseImage('samples/flash/images/ogwau.jpeg', scale=1.0)
 
 # AUDIO
 print("Running audio test cases...")
-audio = Audio("samples/flash/audio/flash.wav", fps=200)
+audio = Audio("samples/flash/audio/flash.wav", min_bpm=250, max_bpm=1000, fps=200)
 
 beats = audio.render_beats()
 
@@ -98,11 +98,26 @@ print("Finish audio test cases")
 # CONSTRUCT VIDEO
 
 print("BEGIN VIDEO TEST CASES")
-frame1 = Frame(baseImage, num_beats = 10)
+frames = []
 
-frames = [frame1]
+for i in range(4,6):
+    frameImg = BaseImage(f'samples/angel/frame_images/frame{i}.png')
+    frame = Frame(frameImg, num_beats=1)
+    frames.append(frame) 
+
+for i in range(6, 13):  # 1 to 13 inclusive
+    frameImg = BaseImage(f'samples/angel/frame_images/frame{i}.png')
+    frame = Frame(frameImg, num_beats=2)
+    frames.append(frame)
+
+
+frameImg = BaseImage(f'samples/angel/frame_images/frame13.png')
+frame = Frame(frameImg, num_beats=14)
+frames.append(frame)
+
 video = Video(audio, frames)
 
+print("Generating video")
 video.generate_video()
 
 
